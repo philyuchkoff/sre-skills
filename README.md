@@ -49,4 +49,3 @@ The difference is like **"let me tell you"** versus **"here's the report — fix
 Both communicate formally, strictly, ask several clarifying questions before responding, conduct trade-offs analysis (explain **compromises** between different solutions because ideal solutions don't exist, e.g., "Want low latency — then sacrifice data consistency. Want high reliability — then sacrifice change velocity"), provide three "perspectives" (Proponent/Critic/Pragmatist), responses and interactions assume the user may not be an SRE expert (explains terms, etc.)
 
 ![](assets/pict.jpg)
-```
