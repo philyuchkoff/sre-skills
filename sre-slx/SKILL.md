@@ -24,7 +24,7 @@ parameters:
     type: choice
     description: Формат вывода SLO документа
     default: markdown
-    choices: [markdown, yaml]
+    choices: [markdown, yaml, json]
 
 validated_memory:
   current_slo:
@@ -50,6 +50,18 @@ validated_memory:
 
 ### Режим 3: Анализ SLO
 Пользователь показывает существующий SLO — ты проверяешь ошибки.
+
+---
+
+## Форматы вывода
+
+Скилл поддерживает 3 формата, выбор через параметр `output_format`:
+
+| Формат | Назначение | Когда использовать |
+|--------|------------|-------------------|
+| `markdown` | Человекочитаемый документ | Для согласования с бизнесом |
+| `yaml` | Конфигурация для GitOps | Для хранения в репозитории |
+| `json` | Автоматическая интеграция | Для API, Terraform, мониторинга |
 
 ---
 
@@ -86,7 +98,7 @@ validated_memory:
 
 ---
 
-## SLO Markdown Template
+## SLO Markdown Template (output_format: markdown)
 
 ```markdown
 # SLO: [Service Name] - [Objective Name]
@@ -127,6 +139,365 @@ State the purpose of this SLO (e.g., "Ensure checkout is available and fast").
 **Good request (counts as success):** status 200, duration < 300ms
 **Bad request (counts as error):** status 500 or timeout > 500ms
 **Excluded:** /health endpoint, /metrics
+```
+
+---
+
+## SLO YAML Template (output_format: yaml)
+
+```yaml
+# SLO Configuration for GitOps / Version Control
+# Compatible with: Prometheus Operator, Thanos, Grafana SLO API
+
+apiVersion: sre/v1
+kind: ServiceLevelObjective
+metadata:
+  name: [service-name]-[objective-name]
+  namespace: sre
+  labels:
+    team: [team-name]
+    service: [service-name]
+    severity: critical
+  annotations:
+    description: "[Human readable description]"
+    owner: "[oncall-handle]"
+    review_date: "[YYYY-MM-DD]"
+
+spec:
+  # SLO Target
+  target: "99.9"  # 99.9% availability
+  window: "28d"   # rolling 28 days
+  
+  # SLI Definition
+  sli:
+    type: availability  # availability | latency | freshness | correctness
+    metric_source: prometheus
+    numerator: |
+      sum(rate(http_requests_total{status!~"5.."}[5m]))
+    denominator: |
+      sum(rate(http_requests_total[5m]))
+    latency_bucket: ""  # for latency SLI: le="0.3"
+    
+  # Error Budget
+  error_budget:
+    policy: rolling_window
+    total_errors_percent: 0.1  # 100% - target = 0.1% allowed errors
+    alerts:
+      - name: severe_burn
+        condition: burn_rate > 14
+        action: page
+      - name: fast_burn
+        condition: burn_rate > 6
+        action: page_after_15m
+      - name: slow_burn
+        condition: burn_rate > 2
+        action: ticket
+    action_policy:
+      budget_thresholds:
+        - threshold: 75
+          action: normal_changes
+        - threshold: 25
+          action: enhanced_review
+        - threshold: 0
+          action: feature_freeze
+  
+  # Exclusions
+  exclusions:
+    - label: "X-Load-Test"
+      value: "true"
+      description: "Load testing traffic"
+    - path: "/health"
+      method: "GET"
+      description: "Health checks"
+  
+  # Historical baseline (for validation)
+  baseline:
+    measured_availability: "99.92"
+    measured_window: "30d"
+    date: "[last-month]"
+```
+
+---
+
+## SLO JSON Template (output_format: json)
+
+### Для автоматической интеграции с:
+
+1. **Terraform / OpenTofu** — создание SLO как ресурса
+2. **Prometheus Operator** — создание SLO CRD через API
+3. **VictoriaMetrics Operator** — автоматическая настройка vmalert
+4. **CI/CD Pipeline** — проверка SLO compliance при деплое
+5. **ChatOps (Telegram/Slack)** — отображение статуса SLO
+
+```json
+{
+  "$schema": "https://raw.githubusercontent.com/slo/spec/main/schema.json",
+  "apiVersion": "sre/v1",
+  "kind": "ServiceLevelObjective",
+  "metadata": {
+    "name": "[service-name]-[objective-name]",
+    "namespace": "sre",
+    "created_at": "2026-04-24T14:00:00Z",
+    "updated_at": "2026-04-24T14:00:00Z",
+    "labels": {
+      "team": "[team-name]",
+      "service": "[service-name]",
+      "severity": "critical",
+      "environment": "production"
+    },
+    "annotations": {
+      "description": "[Human readable description]",
+      "owner": "[oncall-handle]",
+      "slack_channel": "#alerts-sre",
+      "review_due": "2026-07-24"
+    }
+  },
+  "spec": {
+    "target": {
+      "value": 99.9,
+      "unit": "percent",
+      "operator": "gte"
+    },
+    "window": {
+      "duration": "28d",
+      "type": "rolling",
+      "is_calendar": false
+    },
+    "sli": {
+      "type": "availability",
+      "metric_source": "prometheus",
+      "queries": {
+        "numerator": "sum(rate(http_requests_total{status!~\"5..\"}[5m]))",
+        "denominator": "sum(rate(http_requests_total[5m]))",
+        "latency_bucket": null
+      },
+      "thresholds": {
+        "critical": 0.999,
+        "warning": 0.998,
+        "error": 0.995
+      }
+    },
+    "error_budget": {
+      "total_errors_allowed": 0.1,
+      "burn_rate_alerts": [
+        {
+          "name": "severe_burn",
+          "burn_rate": 14,
+          "time_to_exhaust": "1h",
+          "severity": "critical",
+          "action": "page",
+          "promql": "(1 - success_rate) / (1 - 0.999) > 14"
+        },
+        {
+          "name": "fast_burn",
+          "burn_rate": 6,
+          "time_to_exhaust": "5h",
+          "severity": "high",
+          "action": "page_after_15m",
+          "promql": "(1 - success_rate) / (1 - 0.999) > 6"
+        },
+        {
+          "name": "slow_burn",
+          "burn_rate": 2,
+          "time_to_exhaust": "17h",
+          "severity": "medium",
+          "action": "ticket",
+          "promql": "(1 - success_rate) / (1 - 0.999) > 2"
+        }
+      ],
+      "action_policy": {
+        "thresholds": [
+          {
+            "remaining_percent": 75,
+            "action": "normal_changes",
+            "description": "Business as usual"
+          },
+          {
+            "remaining_percent": 25,
+            "action": "enhanced_review",
+            "description": "All changes require senior review"
+          },
+          {
+            "remaining_percent": 0,
+            "action": "feature_freeze",
+            "description": "No feature releases until next window"
+          }
+        ]
+      }
+    },
+    "exclusions": [
+      {
+        "type": "http_header",
+        "name": "X-Load-Test",
+        "value": "true",
+        "description": "Load testing traffic"
+      },
+      {
+        "type": "http_path",
+        "value": "/health",
+        "method": "GET",
+        "description": "Health check endpoint"
+      }
+    ],
+    "observability": {
+      "dashboards": [
+        {
+          "name": "SLO Dashboard",
+          "url": "https://grafana.example.com/d/slo"
+        }
+      ],
+      "metrics_endpoint": "/metrics",
+      "alertmanager": "http://alertmanager.monitoring:9093"
+    }
+  },
+  "status": {
+    "phase": "active",
+    "current_error_budget_remaining": null,
+    "last_measurement": null,
+    "burn_rate_current": null
+  }
+}
+```
+
+---
+
+## JSON: Пример использования в Terraform
+
+```hcl
+# terraform/main.tf
+# Создание SLO через Terraform (интеграция с JSON)
+
+resource "local_file" "slo_json" {
+  content = jsonencode({
+    apiVersion = "sre/v1"
+    kind = "ServiceLevelObjective"
+    metadata = {
+      name = "payment-api-availability"
+      labels = {
+        team = "payment"
+        service = "payment-api"
+      }
+    }
+    spec = {
+      target = {
+        value = 99.9
+      }
+      window = {
+        duration = "28d"
+      }
+      sli = {
+        type = "availability"
+        queries = {
+          numerator = "sum(rate(http_requests_total{status!~\"5..\"}[5m]))"
+          denominator = "sum(rate(http_requests_total[5m]))"
+        }
+      }
+    }
+  })
+  filename = "./generated/slo-payment-api.json"
+}
+
+# Отправить в Prometheus Operator через kubectl
+resource "null_resource" "apply_slo" {
+  provisioner "local-exec" {
+    command = "kubectl apply -f ${local_file.slo_json.filename}"
+  }
+  depends_on = [local_file.slo_json]
+}
+```
+
+---
+
+## JSON: Интеграция с VictoriaMetrics vmalert
+
+```yaml
+# vmalert config using JSON SLO
+groups:
+  - name: slo_alerts
+    rules:
+      - alert: SLOBurnRateHigh
+        expr: |
+          (1 - sum(rate(http_requests_total{status!~"5.."}[5m])) / sum(rate(http_requests_total[5m]))) 
+          / (1 - 0.999) > 14
+        for: 5m
+        labels:
+          severity: critical
+          slo_name: "{{ $labels.service }}-availability"
+        annotations:
+          summary: "SLO budget will exhaust in <1 hour"
+          runbook: "https://wiki.example.com/slo-burn"
+```
+
+---
+
+## JSON: API для автоматической генерации SLO
+
+```python
+# Python example: programmatic SLO generation
+import json
+import requests
+from datetime import datetime, timedelta
+
+def generate_slo(service_name: str, target: float, team: str) -> dict:
+    """Generate SLO JSON for API integration"""
+    
+    slo_template = {
+        "apiVersion": "sre/v1",
+        "kind": "ServiceLevelObjective",
+        "metadata": {
+            "name": f"{service_name}-availability",
+            "created_at": datetime.utcnow().isoformat(),
+            "labels": {
+                "team": team,
+                "service": service_name,
+                "generated_by": "sre-slo-templates"
+            }
+        },
+        "spec": {
+            "target": {"value": target},
+            "window": {"duration": "28d"},
+            "sli": {
+                "type": "availability",
+                "queries": {
+                    "numerator": f'sum(rate({service_name}_requests_total{{status!~"5.."}}[5m]))',
+                    "denominator": f'sum(rate({service_name}_requests_total[5m]))'
+                }
+            }
+        }
+    }
+    return slo_template
+
+# Use it
+slo = generate_slo("payment-api", 99.9, "payment-team")
+print(json.dumps(slo, indent=2))
+
+# Send to internal SLO API
+# response = requests.post("https://slo-api.company.com/v1/slos", json=slo)
+```
+
+---
+
+## JSON: Проверка SLO compliance в CI/CD
+
+```bash
+#!/bin/bash
+# pre-deploy-check.sh
+# Проверяет, не превышен ли error budget перед деплоем
+
+# Получить текущий статус SLO из API
+curl -s https://slo-api.company.com/v1/slos/payment-api | jq . > slo_status.json
+
+# Проверить остаток бюджета
+BUDGET_REMAINING=$(jq '.status.current_error_budget_remaining // 100' slo_status.json)
+
+if (( $(echo "$BUDGET_REMAINING < 10" | bc -l) )); then
+    echo "❌ Error budget below 10% ($BUDGET_REMAINING%). Deploy blocked."
+    echo "Fix reliability issues before releasing new features."
+    exit 1
+else
+    echo "✅ Error budget OK ($BUDGET_REMAINING%). Proceeding with deploy."
+    exit 0
+fi
 ```
 
 ---
@@ -243,11 +614,21 @@ Increase SLO gradually, never decrease.
 
 ---
 
-## Output Format
+## Output Format Selection
 
-If user asks for SLO document → generate full markdown using template.
+**Если пользователь не указал `output_format` или указал `markdown`:**
+- Выдай человекочитаемый документ по Markdown шаблону
+- Добавь пояснения и "why"
 
-If user asks for advice → provide explanation with examples.
+**Если пользователь указал `output_format: yaml`:**
+- Выдай готовый YAML для GitOps
+- Без лишнего текста, только YAML
 
-Always show PromQL queries when discussing SLI.
-кой интеграции с мониторингом?
+**Если пользователь указал `output_format: json`:**
+- Выдай JSON совместимый со схемой
+- Добавь комментарий с инструкцией по использованию
+- Пример интеграции: `# Для использования в Terraform/Prometheus Operator`
+
+**Если пользователь просит "интеграция" или "API":**
+- Покажи JSON формат
+- Добавь примеры кода (Python, bash, Terraform)
