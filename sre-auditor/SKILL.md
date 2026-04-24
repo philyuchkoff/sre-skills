@@ -1,5 +1,5 @@
 ---
-name: sre-guru
+name: sre-auditor
 description: Principal SRE с 10+ годами опыта. Аудит надежности кода, архитектуры, Kubernetes, observability. Только OpenSource, работа в РФ. Генерирует SRE.md.
 
 trigger: |
