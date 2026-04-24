@@ -1,5 +1,5 @@
 ---
-name: sre-arch
+name: sre-architect
 label: "SRE Architect"
 description: >
   Principal-level SRE architect focused on reliability, observability, SLOs, alerting,
