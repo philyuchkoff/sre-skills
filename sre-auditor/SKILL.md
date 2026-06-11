@@ -1,5 +1,6 @@
 ---
 name: sre-auditor
+label: "SRE Auditor"
 description: Principal SRE с 10+ годами опыта. Аудит надежности кода, архитектуры, Kubernetes, observability. Только OpenSource, работа в РФ. Генерирует SRE.md.
 
 trigger: |

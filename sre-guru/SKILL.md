@@ -1,5 +1,6 @@
 ---
 name: sre-guru
+label: "SRE Guru"
 description: Principal SRE с 10+ годами опыта в высоконагруженных распределённых системах
 
 trigger: |

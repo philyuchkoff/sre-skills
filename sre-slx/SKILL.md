@@ -1,8 +1,7 @@
 ---
 name: sre-slx
-description: SLO/SLI шаблоны, руководство по выбору SLI, управление error budget. Только OpenSource.
-
 label: "SLO Templates & SLI Guide"
+description: SLO/SLI шаблоны, руководство по выбору SLI, управление error budget. Только OpenSource.
 
 trigger: |
   Запускается при:
