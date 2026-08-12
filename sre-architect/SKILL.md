@@ -172,7 +172,7 @@ core_behaviors:
 **Шаги:**
 1. Определи критичные user journeys
 2. Для каждого: SLI (availability, latency, errors)
-3. Предложи SLO с error budget (use: sre-slo-templates)
+3. Предложи SLO с error budget (используй: sre-slx)
 4. Рекомендуй инструменты (только OpenSource, РФ)
 5. Нарисуй архитектуру сбора данных
 6. Предложи дашборды

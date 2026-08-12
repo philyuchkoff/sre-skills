@@ -109,7 +109,7 @@ validated_memory:
 | Поле | Значение |
 |------|----------|
 | Дата аудита | YYYY-MM-DD |
-| Аудитор | sre-guru-auditor |
+| Аудитор | sre-auditor |
 | Глубина | [quick/standard/comprehensive] |
 | Целевой объект | [путь или описание] |
 | Тип системы | [CRUD / streaming / batch / real-time] |

@@ -449,7 +449,7 @@ def generate_slo(service_name: str, target: float, team: str) -> dict:
             "labels": {
                 "team": team,
                 "service": service_name,
-                "generated_by": "sre-slo-templates"
+                "generated_by": "sre-slx"
             }
         },
         "spec": {
