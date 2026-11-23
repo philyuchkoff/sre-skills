@@ -9,12 +9,12 @@
 
 ## Что делает
 
-| Режим | Запрос | Результат |
-|-------|--------|-----------|
-| Консультация | «Как спроектировать observability» | Решение с trade-offs |
-| PRR | «Проведи PRR» | Вердикт и список действий |
-| Дизайн | «Спроектируй мониторинг для 20 сервисов» | Схема сбора и инструменты |
-| Риски | «Найди слабые места» | Реестр рисков с владельцами |
+| Режим        | Запрос                                   | Результат                   |
+| ------------ | ---------------------------------------- | --------------------------- |
+| Консультация | «Как спроектировать observability»       | Решение с trade-offs        |
+| PRR          | «Проведи PRR»                            | Вердикт и список действий   |
+| Дизайн       | «Спроектируй мониторинг для 20 сервисов» | Схема сбора и инструменты   |
+| Риски        | «Найди слабые места»                     | Реестр рисков с владельцами |
 
 ## Структура
 
@@ -46,16 +46,16 @@ sre-architect/
 
 ## Стек
 
-| Категория | Инструменты |
-|-----------|-------------|
-| Метрики | VictoriaMetrics, Prometheus, Thanos |
-| Логи | Loki, Elasticsearch + Kibana |
-| Трейсы | Jaeger, Tempo |
-| Сбор | OpenTelemetry Collector |
-| Дашборды | Grafana |
-| Алерты | Alertmanager, Keep |
-| Chaos | Chaos Mesh, Litmus |
-| Связь | Telegram, Mattermost |
+| Категория | Инструменты                         |
+| --------- | ----------------------------------- |
+| Метрики   | VictoriaMetrics, Prometheus, Thanos |
+| Логи      | Loki, Elasticsearch + Kibana        |
+| Трейсы    | Jaeger, Tempo                       |
+| Сбор      | OpenTelemetry Collector             |
+| Дашборды  | Grafana                             |
+| Алерты    | Alertmanager, Keep                  |
+| Chaos     | Chaos Mesh, Litmus                  |
+| Связь     | Telegram, Mattermost                |
 
 Подробнее, с лицензиями и критериями выбора — `references/tooling.md`.
 
@@ -68,10 +68,8 @@ sre-architect/
 
 ## Связанные скиллы
 
-| Скилл | Когда использовать |
-|-------|--------------------|
-| [`sre-guru`](../sre-guru/README.md) | Тактический разбор конкретной проблемы |
-| [`sre-auditor`](../sre-auditor/README.md) | Аудит кода и конфигов, отчёт `SRE.md` |
-| [`sre-slx`](../sre-slx/README.md) | SLO/SLI, error budget, burn rate |
-
-![](../assets/pict.jpg)
+| Скилл                                     | Когда использовать                     |
+| ----------------------------------------- | -------------------------------------- |
+| [`sre-guru`](../sre-guru/README.md)       | Тактический разбор конкретной проблемы |
+| [`sre-auditor`](../sre-auditor/README.md) | Аудит кода и конфигов, отчёт `SRE.md`  |
+| [`sre-slx`](../sre-slx/README.md)         | SLO/SLI, error budget, burn rate       |
