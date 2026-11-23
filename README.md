@@ -2,7 +2,7 @@
 
 Набор специализированных скиллов для Claude Code (и совместимых LLM-агентов) по Site Reliability Engineering. **Все рекомендации — только OpenSource, работающий в РФ.**
 
-![SRE Auditor](../assets/pict.jpg)
+![SRE Auditor](./assets/pict.jpg)
 
 ## Сравнение скиллов
 
