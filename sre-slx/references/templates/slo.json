@@ -1,0 +1,74 @@
+{
+  "schema": "sre.internal/v1",
+  "kind": "ServiceLevelObjective",
+  "metadata": {
+    "name": "service-name-objective-name",
+    "labels": {
+      "team": "team-name",
+      "service": "service-name",
+      "severity": "critical"
+    },
+    "annotations": {
+      "description": "что защищаем для пользователя",
+      "owner": "oncall-handle",
+      "review_date": "YYYY-MM-DD"
+    }
+  },
+  "spec": {
+    "target": 0.999,
+    "window": "28d",
+    "sli": {
+      "type": "availability",
+      "queries": {
+        "numerator": "sum(rate(http_requests_total{status!~\"5..\", route!~\"/health|/metrics\"}[5m]))",
+        "denominator": "sum(rate(http_requests_total{route!~\"/health|/metrics\"}[5m]))"
+      },
+      "threshold": null
+    },
+    "error_budget": {
+      "total_errors_percent": 0.1,
+      "budget_minutes": 40,
+      "alerts": [
+        {
+          "name": "critical_burn",
+          "burn_rate": 14.4,
+          "long_window": "1h",
+          "short_window": "5m",
+          "severity": "P0",
+          "action": "page"
+        },
+        {
+          "name": "fast_burn",
+          "burn_rate": 6,
+          "long_window": "6h",
+          "short_window": "30m",
+          "severity": "P1",
+          "action": "page"
+        },
+        {
+          "name": "slow_burn",
+          "burn_rate": 1,
+          "long_window": "3d",
+          "short_window": "6h",
+          "severity": "P2",
+          "action": "ticket"
+        }
+      ],
+      "policy": [
+        { "remaining_percent": 50, "action": "normal_changes" },
+        { "remaining_percent": 25, "action": "enhanced_review" },
+        { "remaining_percent": 0, "action": "feature_freeze" }
+      ]
+    },
+    "exclusions": [
+      { "type": "http_path", "value": "/health" },
+      { "type": "http_path", "value": "/metrics" },
+      { "type": "label", "name": "load_test", "value": "true" }
+    ],
+    "baseline": {
+      "measured_availability": 0.9992,
+      "measured_window": "30d",
+      "measured_at": "YYYY-MM-DD"
+    }
+  }
+}

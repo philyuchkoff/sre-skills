@@ -23,6 +23,10 @@
 | Спроектировать observability, провести PRR, оценить риски | `sre-architect` |
 | Создать/проанализировать SLO, настроить error budget | `sre-slx` |
 
+## Структура
+
+Каждый скилл — `SKILL.md` с процессом и правилами плюс каталог `references/` со справочниками, которые модель подгружает по необходимости. Так основной файл остаётся коротким и не съедает контекст, когда нужен простой ответ.
+
 ## Важно
 
 Ни один скилл **не предлагает платные сервисы** — только OpenSource, работающий в РФ. Правило сформулировано по принципу, а не по списку вендоров: предлагаются только self-hosted варианты. Managed-обёртки того же OpenSource (Grafana Cloud, Elastic Cloud, AWS Managed Prometheus, VictoriaMetrics Cloud) исключены так же, как Datadog, New Relic, Dynatrace, Honeycomb, Sumo Logic и Nobl9.
